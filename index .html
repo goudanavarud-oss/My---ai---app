@@ -1,152 +1,50 @@
-<!DOCTYPE html>
-<html lang="hi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Video Generator</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 0;
-            padding: 20px;
-        }
-        .container {
-            background: white;
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-            max-width: 500px;
-            width: 100%;
-        }
-        h1 {
-            text-align: center;
-            color: #333;
-            margin-bottom: 30px;
-            font-size: 24px;
-        }
-        input, textarea {
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            font-size: 16px;
-            box-sizing: border-box;
-        }
-        input:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-        button {
-            width: 100%;
-            padding: 15px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 18px;
-            cursor: pointer;
-            margin-top: 20px;
-        }
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(102,126,234,0.4);
-        }
-        #output {
-            margin-top: 20px;
-            text-align: center;
-        }
-        .loading {
-            display: none;
-            text-align: center;
-            margin-top: 20px;
-        }
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #667eea;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 20px auto;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        .success {
-            background: #d4edda;
-            color: #155724;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 20px;
-        }
-        .error {
-            background: #f8d7da;
-            color: #721c24;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 20px;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>🎬 AI Video Generator</h1>
+<script>
+    async function generateVideo() {
+        var topic = document.getElementById('topic').value;
         
-        <input type="text" id="topic" placeholder="Video ka topic likhein (jaise: AI in 2026)">
-        
-        <textarea id="script" placeholder="Script likhein (optional)" rows="4"></textarea>
-        
-        <button onclick="generateVideo()">Video Banayein</button>
-        
-        <div class="loading" id="loading">
-            <div class="spinner"></div>
-            <p>Video ban rahi hai... Kripya pratiksha karein</p>
-        </div>
-        
-        <div id="output"></div>
-    </div>
+        if (!topic) {
+            alert('कृपया topic लिखें!');
+            return;
+        }
 
-    <script>
-        function generateVideo() {
-            var topic = document.getElementById('topic').value;
-            var script = document.getElementById('script').value;
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('output').innerHTML = '';
+
+        try {
+            // यहाँ अपना Render वाला लिंक डालें (नीचे BACKEND_URL बदलें)
+            const BACKEND_URL = "https://my-video-backend.onrender.com"; 
             
-            if (!topic) {
-                alert('Kripya topic likhein!');
-                return;
+            const response = await fetch(`${BACKEND_URL}/generate-video?topic=${encodeURIComponent(topic)}`);
+            
+            if (!response.ok) {
+                throw new Error('Video बनाने में समस्या हुई');
             }
+
+            const videoBlob = await response.blob();
+            const videoUrl = URL.createObjectURL(videoBlob);
             
-            document.getElementById('loading').style.display = 'block';
-            document.getElementById('output').innerHTML = '';
+            document.getElementById('loading').style.display = 'none';
             
-            // Simulate video generation
-            setTimeout(function() {
-                document.getElementById('loading').style.display = 'none';
-                
-                var outputDiv = document.getElementById('output');
-                outputDiv.innerHTML = `
-                    <div class="success">
-                        <h3>✅ Video Taiyar Hai!</h3>
-                        <p>Topic: ${topic}</p>
-                        <p>Duration: 60 seconds</p>
-                        <p>Format: 9:16 (Shorts)</p>
-                        <button onclick="downloadVideo()" style="background:#28a745;margin-top:10px;">Download Video</button>
-                    </div>
-                `;
-            }, 5000); // 5 second delay
+            var outputDiv = document.getElementById('output');
+            outputDiv.innerHTML = `
+                <div class="success">
+                    <h3>✅ आपका वीडियो तैयार है!</h3>
+                    <video controls style="width:100%; border-radius:10px; margin-top:10px;">
+                        <source src="${videoUrl}" type="video/mp4">
+                    </video>
+                    <a href="${videoUrl}" download="video.mp4">
+                        <button style="background:#28a745; margin-top:10px;">⬇️ वीडियो डाउनलोड करें</button>
+                    </a>
+                </div>
+            `;
+        } catch (error) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('output').innerHTML = `
+                <div class="error">
+                    <p>❌ Error: ${error.message}</p>
+                    <p>कृपया थोड़ी देर बाद फिर कोशिश करें।</p>
+                </div>
+            `;
         }
-        
-        function downloadVideo() {
-            alert('Video download shuru ho rahi hai!');
-            // Yahan actual video download code aayega
-        }
-    </script>
-</body>
-</html>
+    }
+</script>
