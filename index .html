@@ -11,9 +11,10 @@
         document.getElementById('output').innerHTML = '';
 
         try {
-            // यहाँ अपना Render वाला लिंक डालें (नीचे BACKEND_URL बदलें)
-            const BACKEND_URL = "https://my-video-backend.onrender.com"; 
+            // यहाँ अपना Render वाला लिंक डालें (बिना आखिरी / के)
+            const BACKEND_URL = "https://video-backend-c4t.onrender.com"; 
             
+            // API को कॉल करें
             const response = await fetch(`${BACKEND_URL}/generate-video?topic=${encodeURIComponent(topic)}`);
             
             if (!response.ok) {
